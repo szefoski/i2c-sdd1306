@@ -33,6 +33,11 @@ static const uint8_t SSD_Memory_Adressing_Mode_H = 0x00;
 static const uint8_t Column_Max = 127;
 static const uint8_t Page_Max = 7;
 
+struct Pixel_buffer
+{
+    std::array<uint8_t, 128*64/8 + 1> screen_buffer;
+};
+
 class SSD1306
 {
 public:
@@ -41,6 +46,7 @@ public:
         , m_slave_address(slave_address)
     {
         screen_buffer[0] = SSD_Data_Mode;
+        commands_stack.push_back(SSD_Command_Mode);
     }
 
     void setup_connection()
@@ -74,7 +80,7 @@ public:
 
     void init_screen()
     {
-        std::vector<unsigned char> data
+        append_commands(
         {
             SSD_Command_Mode,
             SSD_Com_Display_Off,
@@ -101,16 +107,17 @@ public:
             SSD_Com_Set_Memory_Adressing_Mode,
             SSD_Memory_Adressing_Mode_H,
             SSD_Com_Display_On,
-        };
-        send(data);
+        }
+        );
+
+        flush_commands();
         flush_buffer();
     }
 
     void send_command(unsigned char command)
     {
-        static const char buffer_length = 2;
-        unsigned char buffer[buffer_length] = {0x00, command};
-        send(buffer, buffer_length);
+        append_commands({0x00, command});
+        flush_commands();
     }
 
     void draw()
@@ -127,33 +134,52 @@ public:
         send(buffer, buffer_length);
     }
 
+    void set_pixel(uint8_t x, uint8_t y, bool value)
+    {
+        clean_screen();
+        size_t pixel_no = y * 128 + x;
+        size_t byte_no = y / 8 *128 + x;
+        printf("x(%d), y(%d), no(%d)\n", x, y, byte_no);
+        screen_buffer[byte_no + 1] = 255;
+        flush_buffer();
+    }
+
     void clean_screen()
     {
-        static std::vector<unsigned char> data = std::vector<unsigned char>(1025, 0);
-        data[0] = SSD_Data_Mode;
-        send(data);
+        std::fill(std::begin(screen_buffer) + 1, std::end(screen_buffer), 0);
+        flush_buffer();
     }
 
     void draw_random_pixels()
     {
-        std::vector<unsigned char> data = std::vector<unsigned char>(1025, 0);
-        for (unsigned char &i : data)
+        for (auto begin = screen_buffer.begin() + 1; begin != screen_buffer.end(); ++begin)
         {
-            i = rand() % 256;
+            *begin = rand() % 256; 
         }
-        data[0] = SSD_Data_Mode;
-        send(data);
+        flush_buffer();
     }
 
     void set_draw_area(uint8_t column_start, uint8_t column_end, uint8_t page_start, uint8_t page_end)
     {
-        send({0x00, 0x21, column_start, column_end, 0x22, page_start, page_end});
+        append_commands({0x21, column_start, column_end, 0x22, page_start, page_end});
+        flush_commands();
     };
 
     void flush_buffer()
     {
         send(screen_buffer.data(), screen_buffer.size());
     };
+
+    void flush_commands()
+    {
+        send(commands_stack);
+        commands_stack.resize(1);
+    };
+
+    void append_commands(const std::initializer_list<uint8_t> &list)
+    {
+        commands_stack.insert(std::end(commands_stack), list);
+    }
 private:
     void send(const std::vector<uint8_t> &buffer)
     {
@@ -176,6 +202,8 @@ private:
     int m_i2c_bus_file_hand = 0;
     const unsigned char m_slave_address;
     std::array<uint8_t, 128*64/8 + 1> screen_buffer;
+    std::array<uint8_t, 128*64/8 + 1> screen_buffer_new;
+    std::vector<uint8_t> commands_stack;
 };
 
 int main(int argc, char *argv[])
@@ -219,6 +247,10 @@ int main(int argc, char *argv[])
     else if (strcmp(argv[1], "d_back") == 0)
     {
         oled.set_draw_area(0, Column_Max, 0, Page_Max);
+    }
+    else if (strcmp(argv[1], "d_sp") == 0)
+    {
+        oled.set_pixel(static_cast<uint8_t>(strtol(argv[2], NULL, 10)), static_cast<uint8_t>(strtol(argv[3], NULL, 10)), true);
     }
     else if (strcmp(argv[1], "d") == 0)
     {

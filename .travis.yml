@@ -3,5 +3,5 @@ sudo: required
 compiler: gcc
 dist: trusty
 script:
-    - gcc i2c_sdd1306.cpp -std=c++11 -lstdc++ -o i2c_sdd1306
+    - gcc i2c_sdd1306.cpp -std=c++11 -lstdc++ -lm -o i2c_sdd1306
 

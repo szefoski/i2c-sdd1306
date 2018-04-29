@@ -311,71 +311,71 @@ int main(int argc, char *argv[])
 {
     srand(time(NULL));
 
-    SSD1306 oled = SSD1306("/dev/i2c-1", 0x3c);
+    SSD1306 oled = SSD1306(argv[1], (unsigned char)strtol(argv[2], NULL, 16));
     oled.setup_connection();
-    if (strcmp(argv[1], "d_on") == 0)
+    if (strcmp(argv[3], "d_on") == 0)
     {
         oled.send_command(SSD_Com_Display_On);
     }
-    else if (strcmp(argv[1], "d_off") == 0)
+    else if (strcmp(argv[3], "d_off") == 0)
     {
         oled.send_command(SSD_Com_Display_Off);
     }
-    else if (strcmp(argv[1], "d_draw") == 0)
+    else if (strcmp(argv[3], "d_draw") == 0)
     {
         oled.draw();
     }
-    else if (strcmp(argv[1], "d_display_normal") == 0)
+    else if (strcmp(argv[3], "d_display_normal") == 0)
     {
         oled.send_command(0xa6);
     }
-    else if (strcmp(argv[1], "d_init") == 0)
+    else if (strcmp(argv[3], "d_init") == 0)
     {
         oled.init_screen();
     }
-    else if (strcmp(argv[1], "d_cs") == 0)
+    else if (strcmp(argv[3], "d_cs") == 0)
     {
         oled.clean_screen();
     }
-    else if (strcmp(argv[1], "d_random") == 0)
+    else if (strcmp(argv[3], "d_random") == 0)
     {
         oled.draw_random_pixels();
     }
-    else if (strcmp(argv[1], "d_a") == 0)
+    else if (strcmp(argv[3], "d_a") == 0)
     {
         oled.draw_A();
     }
-    else if (strcmp(argv[1], "d_back") == 0)
+    else if (strcmp(argv[3], "d_back") == 0)
     {
         oled.set_draw_area(0, Column_Max, 0, Page_Max);
     }
-    else if (strcmp(argv[1], "d_sp") == 0)
+    else if (strcmp(argv[3], "d_sp") == 0)
     {
         oled.clean_screen();
-        oled.set_pixel(static_cast<uint8_t>(strtol(argv[2], NULL, 10)), static_cast<uint8_t>(strtol(argv[3], NULL, 10)), true);
+        oled.set_pixel(static_cast<uint8_t>(strtol(argv[4], NULL, 10)), static_cast<uint8_t>(strtol(argv[5], NULL, 10)), true);
         oled.flush_buffer();
     }
-    else if (strcmp(argv[1], "d_circle") == 0)
+    else if (strcmp(argv[3], "d_circle") == 0)
     {
         oled.clean_screen();
-        const uint8_t x = static_cast<uint8_t>(strtol(argv[2], NULL, 10));
-        const uint8_t y = static_cast<uint8_t>(strtol(argv[3], NULL, 10));
-        const uint8_t r = static_cast<uint8_t>(strtol(argv[4], NULL, 10));
+        const uint8_t x = static_cast<uint8_t>(strtol(argv[4], NULL, 10));
+        const uint8_t y = static_cast<uint8_t>(strtol(argv[5], NULL, 10));
+        const uint8_t r = static_cast<uint8_t>(strtol(argv[6], NULL, 10));
         oled.draw_circle2(x, y, r);
         oled.flush_buffer();
     }
-    else if (strcmp(argv[1], "d_circle_f") == 0)
+    else if (strcmp(argv[3], "d_circle_f") == 0)
     {
         oled.clean_screen();
-        const uint8_t x = static_cast<uint8_t>(strtol(argv[2], NULL, 10));
-        const uint8_t y = static_cast<uint8_t>(strtol(argv[3], NULL, 10));
-        const uint8_t r = static_cast<uint8_t>(strtol(argv[4], NULL, 10));
+        const uint8_t x = static_cast<uint8_t>(strtol(argv[4], NULL, 10));
+        const uint8_t y = static_cast<uint8_t>(strtol(argv[5], NULL, 10));
+        const uint8_t r = static_cast<uint8_t>(strtol(argv[6], NULL, 10));
         oled.draw_filled_circle(x, y, r);
         oled.flush_buffer();
     }
-    else if (strcmp(argv[1], "d") == 0)
+    else if (strcmp(argv[3], "d") == 0)
     {
-        unsigned char num = (unsigned char)strtol(argv[2], NULL, 16);
+        unsigned char num = (unsigned char)strtol(argv[4], NULL, 16);
         oled.send_command(num);
     }
 }

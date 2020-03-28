@@ -261,7 +261,7 @@ public:
         }
 
         set_draw_area(min_column, max_column, min_page, max_page);
-        printf("Area: %u\nmin_c(%u) max_c(%u)\nmin_p(%u) max_p(%u)\n", area, min_column, max_column, min_page, max_page);
+        printf("Area: %zu\nmin_c(%zu) max_c(%zu)\nmin_p(%zu) max_p(%zu)\n", area, min_column, max_column, min_page, max_page);
         send(vec);
         screen_buffer = screen_buffer_new;
     }
